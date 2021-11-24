@@ -1,5 +1,6 @@
 package com.example.springerrorhandling.service.impl;
 
+import com.example.springerrorhandling.core.exceptions.CustomException;
 import com.example.springerrorhandling.core.exceptions.ServiceException;
 import com.example.springerrorhandling.core.utils.ModelMapperUtils;
 import com.example.springerrorhandling.model.response.TypicodeResponse;
@@ -10,6 +11,7 @@ import com.example.springerrorhandling.service.TypicodeService;
 import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,7 +36,7 @@ public class TodoServiceImpl implements TodoService {
         TypicodeResponse response = typicodeService.fetch(id);
         Todo todo = ModelMapperUtils.map(response, Todo.class);
         todoRepository.findById(id).ifPresent(data -> {
-            throw new ServiceException("Todo already exist on database");
+            throw new CustomException("Todo already exist on database", HttpStatus.NOT_FOUND);
         });
         return todoRepository.save(todo);
     }
@@ -43,7 +45,7 @@ public class TodoServiceImpl implements TodoService {
     public List<Todo> createTodo() {
         List<TypicodeResponse> responses = typicodeService.fetchAll();
         if (responses.isEmpty()) {
-            throw new ServiceException("Their is no record available on the API");
+            throw new CustomException("Their is no record available on the API", HttpStatus.NO_CONTENT);
         }
 
         long start = System.nanoTime();

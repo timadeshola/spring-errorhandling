@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -91,7 +92,7 @@ public class UserServiceImpl implements UserService {
     public List<UserResponse> fetchUsers() {
         List<User> users = userRepository.findAll();
         if (users.isEmpty()) {
-            throw new CustomException("User record is empty", HttpStatus.NO_CONTENT);
+            return Collections.emptyList();
         }
         return ModelMapperUtils.mapAll(users, UserResponse.class);
     }
@@ -100,7 +101,10 @@ public class UserServiceImpl implements UserService {
     public PaginateResponse<UserResponse> fetchUsers(int start, int limit) {
         Page<User> users = userRepository.findAll(PageRequest.of(start, limit));
         if (users.isEmpty()) {
-            throw new CustomException("No user info is available", HttpStatus.NO_CONTENT);
+            return PaginateResponse.<UserResponse>builder()
+                    .content(Collections.emptyList())
+                    .totalElements(0)
+                    .build();
         }
         return PaginateResponse.<UserResponse>builder()
                 .content(ModelMapperUtils.mapAll(users.getContent(), UserResponse.class))
